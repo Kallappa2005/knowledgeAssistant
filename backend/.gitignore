@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local environment and runtime data
+.env
+uploads/
+!uploads/
+!uploads/documents/
+!uploads/temporary/
+uploads/documents/*
+uploads/temporary/*
+!uploads/documents/.gitkeep
+!uploads/temporary/.gitkeep
+chroma_db/
