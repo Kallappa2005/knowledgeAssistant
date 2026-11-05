@@ -18,6 +18,11 @@ export async function listLearningCourses() {
   return data
 }
 
+export async function deleteLearningCourse(courseId) {
+  const { data } = await api.delete(`/admin/learning/courses/${courseId}`)
+  return data
+}
+
 export async function listLearningEmployees() {
   const { data } = await api.get('/admin/learning/employees')
   return data

@@ -60,6 +60,8 @@ Phase 5 supports PDF uploads through admin-only endpoints:
 - `GET /admin/documents`
 - `PATCH /admin/documents/{document_id}/approve`
 - `PATCH /admin/documents/{document_id}/deactivate`
+- `DELETE /admin/documents/{document_id}` (deactivated documents only; removes
+  the stored PDF, vector chunks, and document record)
 
 Uploaded files are stored under `uploads/documents` with generated filenames.
 The original filename is retained only as metadata. Uploads are limited to
@@ -165,6 +167,8 @@ through:
 
 - `POST /admin/learning/courses`
 - `GET /admin/learning/courses`
+- `DELETE /admin/learning/courses/{course_id}` (the creating administrator
+  only; also removes assignments and the stored training PDF)
 - `GET /admin/learning/employees`
 - `POST /admin/learning/courses/{course_id}/assign`
 - `GET /admin/learning/assignments`
@@ -177,6 +181,9 @@ Employees can access only their own assignments through:
 - `POST /learning/assignments/{assignment_id}/quiz`
 - `POST /learning/assignments/{assignment_id}/quiz/{attempt_id}/submit`
 - `POST /learning/assignments/{assignment_id}/complete`
+
+Administrator escalation responses include the employee identity associated
+with each request (`full_name`, `email`, and `id`).
 
 Run `uv run python -m app.database.init_db` after pulling the learning
 backend changes. It creates only missing additive tables:

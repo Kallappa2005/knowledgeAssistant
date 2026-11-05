@@ -101,6 +101,13 @@ def list_courses(db: Session) -> list[LearningCourse]:
     )
 
 
+def delete_course(db: Session, course: LearningCourse) -> None:
+    storage_path = Path(course.storage_path)
+    db.delete(course)
+    db.commit()
+    storage_path.unlink(missing_ok=True)
+
+
 def list_employee_accounts(db: Session) -> list[User]:
     return list(
         db.scalars(

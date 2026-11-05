@@ -10,6 +10,7 @@ from app.schemas.learning import (
     CourseAssignmentResponse,
     EmployeeSummary,
     LearningCourseResponse,
+    LearningCourseDeleteResponse,
 )
 from app.services.learning_service import (
     assign_course,
@@ -18,6 +19,7 @@ from app.services.learning_service import (
     list_courses,
     list_employee_accounts,
     store_training_pdf,
+    delete_course,
 )
 
 router = APIRouter(
@@ -63,6 +65,24 @@ async def upload_course(
 @router.get("/courses", response_model=list[LearningCourseResponse])
 def get_courses(db: DatabaseSession) -> list[LearningCourse]:
     return list_courses(db)
+
+
+@router.delete(
+    "/courses/{course_id}",
+    response_model=LearningCourseDeleteResponse,
+)
+def remove_course(
+    course_id: UUID,
+    db: DatabaseSession,
+    admin: CurrentUser,
+) -> LearningCourseDeleteResponse:
+    course = db.get(LearningCourse, course_id)
+    if course is None:
+        raise HTTPException(status_code=404, detail="Learning course not found.")
+    if course.created_by_id != admin.id:
+        raise HTTPException(status_code=403, detail="You can delete only courses you created.")
+    delete_course(db, course)
+    return LearningCourseDeleteResponse(message="Learning course deleted.")
 
 
 @router.get("/employees", response_model=list[EmployeeSummary])

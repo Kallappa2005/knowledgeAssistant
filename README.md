@@ -347,6 +347,8 @@ another available port and update `frontend\.env` to match.
 - `GET /admin/documents`
 - `PATCH /admin/documents/{document_id}/approve`
 - `PATCH /admin/documents/{document_id}/deactivate`
+- `DELETE /admin/documents/{document_id}` (deactivated documents only;
+  removes the stored PDF, vector chunks, and document record)
 - `POST /admin/documents/{document_id}/process`
 - `POST /rag/query`
 
@@ -363,6 +365,8 @@ another available port and update `frontend\.env` to match.
 
 - `POST /admin/learning/courses`
 - `GET /admin/learning/courses`
+- `DELETE /admin/learning/courses/{course_id}` (creator only; removes its
+  employee assignments and stored training PDF)
 - `GET /admin/learning/employees`
 - `POST /admin/learning/courses/{course_id}/assign`
 - `GET /admin/learning/assignments`
@@ -372,6 +376,9 @@ another available port and update `frontend\.env` to match.
 - `POST /learning/assignments/{assignment_id}/quiz`
 - `POST /learning/assignments/{assignment_id}/quiz/{attempt_id}/submit`
 - `POST /learning/assignments/{assignment_id}/complete`
+
+Administrator escalation responses include the originating employee's name,
+email address, and user ID so HR can identify who submitted each request.
 
 ## Validation commands
 

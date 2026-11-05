@@ -39,6 +39,7 @@ import { useAuth } from '../../context/useAuth'
 import {
   approveDocument,
   deactivateDocument,
+  deleteDocument,
   listAdminEscalations,
   listAuditLogs,
   listDocuments,
@@ -635,6 +636,20 @@ export default function AdminHomePage() {
                             Deactivate
                           </Button>
                         )}
+                        {document.status === 'DEACTIVATED' && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                              if (window.confirm(`Delete "${document.original_filename}" permanently?`)) {
+                                performAction(document.id, () => deleteDocument(document.id), 'Document deleted.')
+                              }
+                            }}
+                            sx={{ fontSize: '0.75rem', borderColor: '#fecaca', color: '#dc2626', '&:hover': { borderColor: '#dc2626', bgcolor: '#fef2f2' } }}
+                          >
+                            Delete
+                          </Button>
+                        )}
                         {busyId === document.id && <CircularProgress size={16} />}
                       </div>
                     </td>
@@ -691,7 +706,7 @@ export default function AdminHomePage() {
                       </p>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-400">{formatRelativeDate(item.created_at)}</span>
+                      <span className="text-xs text-slate-400">{item.user?.full_name || item.user?.email || 'Unknown employee'} · {formatRelativeDate(item.created_at)}</span>
                       <StatusBadge status={item.status} />
                     </div>
                   </button>
@@ -711,7 +726,8 @@ export default function AdminHomePage() {
                 <StatusBadge status={selectedEscalation.status} />
               </div>
               <p className="mb-5 text-xs text-slate-400">
-                Submitted {formatDate(selectedEscalation.created_at)}
+                Submitted by <span className="font-semibold text-slate-600">{selectedEscalation.user?.full_name || selectedEscalation.user?.email || 'Unknown employee'}</span>
+                {' · '}{selectedEscalation.user?.email || 'No email'} · {formatDate(selectedEscalation.created_at)}
               </p>
 
               {/* Response history */}

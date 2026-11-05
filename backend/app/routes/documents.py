@@ -10,6 +10,7 @@ from app.services.document_service import (
     list_documents,
     set_document_status,
     store_pdf,
+    delete_deactivated_document,
 )
 from app.services.processing_service import deactivate_document_index, process_document
 
@@ -69,6 +70,19 @@ def deactivate_document(document_id: UUID, db: DatabaseSession) -> Document:
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
     return document
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_document(document_id: UUID, db: DatabaseSession) -> None:
+    document = delete_deactivated_document(db, document_id)
+    if document is None:
+        existing = db.get(Document, document_id)
+        if existing is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only deactivated documents can be deleted.",
+        )
 
 
 @router.post("/{document_id}/process", response_model=DocumentProcessingResponse)

@@ -4,10 +4,11 @@ from uuid import UUID, uuid4
 
 from fastapi import UploadFile
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import get_settings
 from app.models.entities import Document, DocumentStatus, User
+from app.services.vector_service import delete_document_chunks
 
 PDF_CONTENT_TYPE = "application/pdf"
 PDF_SIGNATURE = b"%PDF-"
@@ -113,4 +114,23 @@ def set_document_status(
     )
     db.commit()
     db.refresh(document)
+    return document
+
+
+def delete_deactivated_document(db: Session, document_id: UUID) -> Document | None:
+    document = db.scalar(
+        select(Document)
+        .options(selectinload(Document.citations))
+        .where(
+            Document.id == document_id,
+            Document.status == DocumentStatus.DEACTIVATED,
+        )
+    )
+    if document is None:
+        return None
+    delete_document_chunks(str(document.id))
+    storage_path = Path(document.storage_path)
+    db.delete(document)
+    db.commit()
+    storage_path.unlink(missing_ok=True)
     return document

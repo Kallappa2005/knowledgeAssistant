@@ -36,7 +36,16 @@ class EscalationModel(BaseModel):
     status: EscalationStatus
     created_at: datetime
     updated_at: datetime
+    user: "EscalationUserModel"
     responses: list[EscalationResponseModel] = Field(default_factory=list)
+
+
+class EscalationUserModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    email: str
+    full_name: str
 
 
 class AuditLogModel(BaseModel):

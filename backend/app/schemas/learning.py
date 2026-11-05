@@ -29,6 +29,10 @@ class LearningCourseResponse(BaseModel):
     updated_at: datetime
 
 
+class LearningCourseDeleteResponse(BaseModel):
+    message: str
+
+
 class CourseAssignmentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

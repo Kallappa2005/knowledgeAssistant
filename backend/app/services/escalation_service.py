@@ -24,7 +24,10 @@ ALLOWED_STATUS_TRANSITIONS: dict[EscalationStatus, set[EscalationStatus]] = {
 
 
 def _with_responses():
-    return selectinload(Escalation.responses)
+    return (
+        selectinload(Escalation.responses),
+        selectinload(Escalation.user),
+    )
 
 
 def _audit(
@@ -59,7 +62,7 @@ def list_user_escalations(db: Session, user: User) -> list[Escalation]:
     return list(
         db.scalars(
             select(Escalation)
-            .options(_with_responses())
+            .options(*_with_responses())
             .where(Escalation.user_id == user.id)
             .order_by(Escalation.updated_at.desc())
         ).all()
@@ -70,7 +73,7 @@ def list_admin_escalations(db: Session) -> list[Escalation]:
     return list(
         db.scalars(
             select(Escalation)
-            .options(_with_responses())
+            .options(*_with_responses())
             .order_by(Escalation.updated_at.desc())
         ).all()
     )
@@ -81,7 +84,7 @@ def get_owned_escalation(
 ) -> Escalation | None:
     return db.scalar(
         select(Escalation)
-        .options(_with_responses())
+        .options(*_with_responses())
         .where(Escalation.id == escalation_id, Escalation.user_id == user.id)
     )
 
@@ -89,7 +92,7 @@ def get_owned_escalation(
 def get_escalation(db: Session, escalation_id: UUID) -> Escalation | None:
     return db.scalar(
         select(Escalation)
-        .options(_with_responses())
+        .options(*_with_responses())
         .where(Escalation.id == escalation_id)
     )
 

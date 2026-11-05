@@ -26,6 +26,10 @@ export async function deactivateDocument(documentId) {
   return data
 }
 
+export async function deleteDocument(documentId) {
+  await api.delete(`/admin/documents/${documentId}`)
+}
+
 export async function processDocument(documentId) {
   const { data } = await api.post(`/admin/documents/${documentId}/process`)
   return data

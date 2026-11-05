@@ -2,12 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Avatar, Box, Button, Checkbox, CircularProgress, Drawer, FormControlLabel, IconButton, Snackbar, TextField, Tooltip } from '@mui/material'
 import AutoStoriesRounded from '@mui/icons-material/AutoStoriesRounded'
 import CloudUploadRounded from '@mui/icons-material/CloudUploadRounded'
+import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
 import LogoutRounded from '@mui/icons-material/LogoutRounded'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import {
   assignLearningCourse,
   createLearningCourse,
+  deleteLearningCourse,
   listLearningAssignments,
   listLearningCourses,
   listLearningEmployees,
@@ -28,6 +30,7 @@ export default function LearningManagementPage() {
   const [employees, setEmployees] = useState([])
   const [assignments, setAssignments] = useState([])
   const [selectedEmployees, setSelectedEmployees] = useState([])
+  const [selectedCourseId, setSelectedCourseId] = useState(null)
   const [form, setForm] = useState({ title: '', description: '', dueDate: '', estimatedMinutes: 30, file: null })
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState('')
@@ -83,20 +86,39 @@ export default function LearningManagementPage() {
 
   async function assignCourse(courseId) {
     const assignedEmployeeIds = assignedEmployeeIdsByCourse.get(courseId) || new Set()
-    const employeeIds = selectedEmployees.filter((employeeId) => !assignedEmployeeIds.has(employeeId))
+    const courseSelection = selectedCourseId === courseId ? selectedEmployees : []
+    const employeeIds = courseSelection.filter((employeeId) => !assignedEmployeeIds.has(employeeId))
     if (employeeIds.length === 0) {
       setError('Select at least one employee.')
       return
     }
+
     setBusy(`assign-${courseId}`)
     setError('')
     try {
       await assignLearningCourse(courseId, employeeIds)
       setSelectedEmployees([])
+      setSelectedCourseId(null)
       await loadData()
       setNotice('Course assigned.')
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, 'Unable to assign the course.'))
+    } finally {
+      setBusy('')
+    }
+
+  }
+
+  async function removeCourse(course) {
+    if (!window.confirm(`Delete "${course.title}" and all employee assignments?`)) return
+    setBusy(`delete-${course.id}`)
+    setError('')
+    try {
+      await deleteLearningCourse(course.id)
+      await loadData()
+      setNotice('Course and its assignments deleted.')
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Unable to delete the course.'))
     } finally {
       setBusy('')
     }
@@ -117,6 +139,7 @@ export default function LearningManagementPage() {
     })
     return result
   })()
+  const completedAssignments = assignments.filter((item) => ['COMPLETED', 'COMPLETION_REPORTED'].includes(item.status)).length
   const drawer = (
     <Box className="pka-sidebar flex h-full flex-col" sx={{ width: drawerWidth }}>
       <div className="flex items-center gap-3 px-5 py-5">
@@ -149,6 +172,19 @@ export default function LearningManagementPage() {
           {error && <Alert severity="error" onClose={() => setError('')} className="mb-5">{error}</Alert>}
           {loading ? <div className="flex min-h-[50vh] items-center justify-center"><CircularProgress /></div> : (
             <div className="animate-fadeSlideUp space-y-6">
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ['Courses created', courses.length, 'Training materials managed by you'],
+                  ['Total assignments', assignments.length, 'Employee course assignments'],
+                  ['Completed', completedAssignments, 'Assignments reported complete'],
+                ].map(([label, value, description]) => (
+                  <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{label}</p>
+                    <p className="mt-1 text-2xl font-extrabold text-indigo-600">{value}</p>
+                    <p className="mt-1 text-xs text-slate-500">{description}</p>
+                  </div>
+                ))}
+              </div>
               <form onSubmit={createCourse} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
                 <div className="mb-5 flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600"><CloudUploadRounded /></div><div><h1 className="font-bold text-slate-900">Create a training course</h1><p className="text-xs text-slate-500">Upload a PDF and make it available to selected employees.</p></div></div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -167,11 +203,19 @@ export default function LearningManagementPage() {
                 <div className="border-b border-slate-100 p-5"><h2 className="font-bold text-slate-900">Courses and assignments</h2><p className="text-xs text-slate-500">Assign training and review current progress.</p></div>
                 {courses.length === 0 ? <p className="p-8 text-sm text-slate-500">No courses created yet.</p> : <div className="divide-y divide-slate-100">{courses.map((course) => (
                   <div key={course.id} className="p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-4"><div><h3 className="font-semibold text-slate-800">{course.title}</h3><p className="mt-1 text-xs text-slate-500">{course.description}</p><p className="mt-2 text-xs text-slate-400">Due {formatDate(course.due_date)} · {course.estimated_minutes} min</p></div><span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">{selectedCourseIds.has(course.id) ? 'Assigned' : 'Not assigned'}</span></div>
+                    <div className="flex flex-wrap items-start justify-between gap-4"><div><h3 className="font-semibold text-slate-800">{course.title}</h3><p className="mt-1 text-xs text-slate-500">{course.description}</p><p className="mt-2 text-xs text-slate-400">Due {formatDate(course.due_date)} · {course.estimated_minutes} min</p></div><div className="flex items-center gap-2"><span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">{selectedCourseIds.has(course.id) ? 'Assigned' : 'Not assigned'}</span><Button color="error" size="small" startIcon={<DeleteOutlineRounded />} onClick={() => removeCourse(course)} disabled={busy === `delete-${course.id}`}>{busy === `delete-${course.id}` ? 'Deleting…' : 'Delete'}</Button></div></div>
                     <div className="mt-4 flex flex-wrap items-center gap-2"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Employees</span>{employees.map((employee) => {
                       const alreadyAssigned = assignedEmployeeIdsByCourse.get(course.id)?.has(employee.id)
-                      return <FormControlLabel key={employee.id} className="!mr-1" control={<Checkbox size="small" disabled={alreadyAssigned} checked={!alreadyAssigned && selectedEmployees.includes(employee.id)} onChange={(event) => setSelectedEmployees((current) => event.target.checked ? [...current, employee.id] : current.filter((id) => id !== employee.id))} />} label={<span className={`text-xs ${alreadyAssigned ? 'text-slate-400 line-through' : ''}`}>{employee.full_name}{alreadyAssigned ? ' (Already assigned)' : ''}</span>} />
-                    })}<Button size="small" variant="outlined" onClick={() => assignCourse(course.id)} disabled={busy === `assign-${course.id}` || employees.every((employee) => assignedEmployeeIdsByCourse.get(course.id)?.has(employee.id))}>{busy === `assign-${course.id}` ? 'Assigning…' : 'Assign selected'}</Button></div>
+                      return <FormControlLabel key={employee.id} className="!mr-1" control={<Checkbox size="small" disabled={alreadyAssigned} checked={!alreadyAssigned && selectedCourseId === course.id && selectedEmployees.includes(employee.id)} onChange={(event) => {
+                        setSelectedCourseId(course.id)
+                        setSelectedEmployees((current) => {
+                          const scopedSelection = selectedCourseId === course.id ? current : []
+                          return event.target.checked
+                            ? [...scopedSelection, employee.id]
+                            : scopedSelection.filter((id) => id !== employee.id)
+                        })
+                      }} />} label={<span className={`text-xs ${alreadyAssigned ? 'text-slate-400 line-through' : ''}`}>{employee.full_name}{alreadyAssigned ? ' (Already assigned)' : ''}</span>} />
+                    })}<Button size="small" variant="outlined" onClick={() => assignCourse(course.id)} disabled={busy === `assign-${course.id}` || selectedCourseId !== course.id || selectedEmployees.length === 0 || employees.every((employee) => assignedEmployeeIdsByCourse.get(course.id)?.has(employee.id))}>{busy === `assign-${course.id}` ? 'Assigning…' : 'Assign selected'}</Button></div>
                   </div>
                 ))}</div>}
               </section>
