@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,6 +15,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
     refresh_token_cookie_name: str = "refresh_token"
+    refresh_token_samesite: Literal["lax", "strict", "none"] = "lax"
     secure_cookies: bool = False
     document_storage_dir: str = "uploads/documents"
     learning_storage_dir: str = "uploads/learning"
