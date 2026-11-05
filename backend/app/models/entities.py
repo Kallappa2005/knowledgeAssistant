@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import StrEnum
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     Enum,
     ForeignKey,
@@ -44,6 +45,14 @@ class EscalationStatus(StrEnum):
     IN_REVIEW = "IN_REVIEW"
     RESPONDED = "RESPONDED"
     CLOSED = "CLOSED"
+
+
+class LearningAssignmentStatus(StrEnum):
+    NOT_STARTED = "NOT_STARTED"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETION_REPORTED = "COMPLETION_REPORTED"
+    COMPLETED = "COMPLETED"
+    OVERDUE = "OVERDUE"
 
 
 class Role(Base, TimestampMixin):
@@ -87,6 +96,12 @@ class User(Base, TimestampMixin):
         back_populates="user", cascade="all, delete-orphan"
     )
     audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="actor")
+    learning_courses_created: Mapped[list["LearningCourse"]] = relationship(
+        back_populates="created_by"
+    )
+    course_assignments: Mapped[list["CourseAssignment"]] = relationship(
+        back_populates="employee", foreign_keys="CourseAssignment.employee_id"
+    )
 
 
 class UserRole(Base):
@@ -191,6 +206,104 @@ class Citation(Base):
 
     message: Mapped[Message] = relationship(back_populates="citations")
     document: Mapped[Document] = relationship(back_populates="citations")
+
+
+class LearningCourse(Base, TimestampMixin):
+    __tablename__ = "learning_courses"
+    __table_args__ = (Index("ix_learning_courses_created_by_id", "created_by_id"),)
+
+    id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    stored_filename: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    storage_path: Mapped[str] = mapped_column(String(1000), unique=True, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    due_date: Mapped[date] = mapped_column(Date, nullable=False)
+    estimated_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_by_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+
+    created_by: Mapped[User] = relationship(
+        back_populates="learning_courses_created",
+        foreign_keys=[created_by_id],
+    )
+    assignments: Mapped[list["CourseAssignment"]] = relationship(
+        back_populates="course", cascade="all, delete-orphan"
+    )
+
+
+class CourseAssignment(Base, TimestampMixin):
+    __tablename__ = "course_assignments"
+    __table_args__ = (
+        UniqueConstraint("course_id", "employee_id", name="uq_course_employee_assignment"),
+        Index("ix_course_assignments_employee_status", "employee_id", "status"),
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
+    course_id: Mapped[UUID] = mapped_column(
+        ForeignKey("learning_courses.id", ondelete="CASCADE"), nullable=False
+    )
+    employee_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    assigned_by_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    status: Mapped[LearningAssignmentStatus] = mapped_column(
+        Enum(LearningAssignmentStatus, name="learning_assignment_status"),
+        nullable=False,
+        default=LearningAssignmentStatus.NOT_STARTED,
+    )
+    completion_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    knowledge_check_score: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )
+    completion_declaration: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+
+    course: Mapped[LearningCourse] = relationship(back_populates="assignments")
+    employee: Mapped[User] = relationship(
+        back_populates="course_assignments",
+        foreign_keys=[employee_id],
+    )
+    assigned_by: Mapped[User] = relationship(foreign_keys=[assigned_by_id])
+    quiz_attempts: Mapped[list["LearningQuizAttempt"]] = relationship(
+        back_populates="assignment", cascade="all, delete-orphan"
+    )
+
+
+class LearningQuizAttempt(Base, TimestampMixin):
+    __tablename__ = "learning_quiz_attempts"
+    __table_args__ = (
+        Index("ix_learning_quiz_attempts_assignment_id", "assignment_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
+    assignment_id: Mapped[UUID] = mapped_column(
+        ForeignKey("course_assignments.id", ondelete="CASCADE"), nullable=False
+    )
+    questions: Mapped[list] = mapped_column(JSONB, nullable=False)
+    answers: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    assignment: Mapped[CourseAssignment] = relationship(
+        back_populates="quiz_attempts"
+    )
 
 
 class Escalation(Base, TimestampMixin):

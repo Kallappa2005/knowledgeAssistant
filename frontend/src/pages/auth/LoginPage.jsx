@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, Button, IconButton, InputAdornment, TextField, Typography } from '@mui/material'
+import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -38,8 +38,14 @@ export default function LoginPage() {
     setIsSubmitting(true)
     try {
       const user = await login(form)
-      const destination = user.roles.includes('ADMIN') ? '/admin' : '/employee'
-      navigate(location.state?.from?.pathname || destination, { replace: true })
+      const isAdmin = user.roles.includes('ADMIN')
+      const destination = isAdmin ? '/admin' : '/employee'
+      const requestedPath = location.state?.from?.pathname
+      const requestedPathAllowed = requestedPath
+        && (isAdmin
+          ? requestedPath === '/admin' || requestedPath.startsWith('/admin/')
+          : requestedPath === '/employee' || requestedPath.startsWith('/employee/'))
+      navigate(requestedPathAllowed ? requestedPath : destination, { replace: true, state: null })
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, 'Unable to sign in. Please try again.'))
     } finally {

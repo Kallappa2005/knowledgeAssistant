@@ -11,6 +11,8 @@ from app.routes.escalations import admin_router as admin_escalations_router
 from app.routes.escalations import employee_router as employee_escalations_router
 from app.routes.protected import router as protected_router
 from app.routes.rag import router as rag_router
+from app.routes.learning_admin import router as learning_admin_router
+from app.routes.learning_employee import router as learning_employee_router
 
 settings = get_settings()
 
@@ -33,6 +35,8 @@ app.include_router(employee_escalations_router)
 app.include_router(admin_escalations_router)
 app.include_router(protected_router)
 app.include_router(rag_router)
+app.include_router(learning_admin_router)
+app.include_router(learning_employee_router)
 
 
 @app.get("/health", tags=["health"])

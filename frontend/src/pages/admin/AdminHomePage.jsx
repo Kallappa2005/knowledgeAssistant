@@ -33,6 +33,7 @@ import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded'
 import SearchRounded from '@mui/icons-material/SearchRounded'
 import InsertDriveFileRounded from '@mui/icons-material/InsertDriveFileRounded'
 import RefreshRounded from '@mui/icons-material/RefreshRounded'
+import SchoolRounded from '@mui/icons-material/SchoolRounded'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import {
@@ -274,6 +275,7 @@ export default function AdminHomePage() {
       badge: stats.openEscalations,
     },
     { label: 'Audit activity', icon: <HistoryRounded sx={{ fontSize: 18 }} />, tab: 3 },
+    { label: 'Learning management', icon: <SchoolRounded sx={{ fontSize: 18 }} />, route: '/admin/learning' },
   ]
 
   /* ── Sidebar ─────────────────────────────────────────────────────── */
@@ -301,7 +303,14 @@ export default function AdminHomePage() {
             <button
               key={item.label}
               type="button"
-              onClick={() => { setActiveTab(item.tab); setMobileOpen(false) }}
+              onClick={() => {
+                if (item.route) {
+                  navigate(item.route)
+                } else {
+                  setActiveTab(item.tab)
+                }
+                setMobileOpen(false)
+              }}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-150 ${
                 isActive
                   ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/25 font-semibold'

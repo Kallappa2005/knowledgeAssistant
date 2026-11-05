@@ -155,3 +155,29 @@ The tests cover password/JWT behavior, authentication and role protection,
 PDF upload validation, grounded citation validation, conversation ownership,
 escalation status rules, and escalation ownership isolation. External Groq
 generation and embedding calls are not required for the deterministic tests.
+
+## AI Learning Companion
+
+The additive learning feature keeps training PDFs under `uploads/learning`
+and never indexes them in the policy ChromaDB collection. Administrators can
+create courses, list active employees, assign courses, and monitor assignments
+through:
+
+- `POST /admin/learning/courses`
+- `GET /admin/learning/courses`
+- `GET /admin/learning/employees`
+- `POST /admin/learning/courses/{course_id}/assign`
+- `GET /admin/learning/assignments`
+
+Employees can access only their own assignments through:
+
+- `GET /learning/my-courses`
+- `GET /learning/assignments/{assignment_id}/document`
+- `POST /learning/assignments/{assignment_id}/summary`
+- `POST /learning/assignments/{assignment_id}/quiz`
+- `POST /learning/assignments/{assignment_id}/quiz/{attempt_id}/submit`
+- `POST /learning/assignments/{assignment_id}/complete`
+
+Run `uv run python -m app.database.init_db` after pulling the learning
+backend changes. It creates only missing additive tables:
+`learning_courses`, `course_assignments`, and `learning_quiz_attempts`.

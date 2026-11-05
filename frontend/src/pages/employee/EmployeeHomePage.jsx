@@ -19,6 +19,7 @@ import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
 import SupportAgentRounded from '@mui/icons-material/SupportAgentRounded'
 import ArticleOutlined from '@mui/icons-material/ArticleOutlined'
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
+import AutoStoriesRounded from '@mui/icons-material/AutoStoriesRounded'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import {
@@ -411,6 +412,23 @@ export default function EmployeeHomePage() {
           }}
         >
           New conversation
+        </Button>
+        <Button
+          fullWidth
+          startIcon={<AutoStoriesRounded sx={{ fontSize: 18 }} />}
+          onClick={() => navigate('/employee/learning')}
+          sx={{
+            justifyContent: 'flex-start',
+            color: '#94a3b8',
+            borderRadius: '10px',
+            py: 1,
+            mt: 1,
+            fontWeight: 600,
+            fontSize: '0.8125rem',
+            '&:hover': { background: 'rgba(255,255,255,0.06)', color: '#e2e8f0' },
+          }}
+        >
+          My learning
         </Button>
       </div>
 

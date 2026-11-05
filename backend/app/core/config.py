@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     refresh_token_cookie_name: str = "refresh_token"
     secure_cookies: bool = False
     document_storage_dir: str = "uploads/documents"
+    learning_storage_dir: str = "uploads/learning"
     max_document_size_bytes: int = 10 * 1024 * 1024
     chroma_storage_dir: str = "chroma_db"
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
