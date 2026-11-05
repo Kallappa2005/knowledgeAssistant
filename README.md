@@ -13,11 +13,13 @@ The project has two role-based experiences:
   knowledge base, answer escalated questions, manage training courses, assign
   employees, and review learning progress.
 
-## Product demo
+## 🎥 Product Demo
 
-<video src="./demo.mp4" controls width="800">
-  Your browser cannot play the video. [Watch the demo](./demo.mp4) instead.
-</video>
+Watch the complete demonstration of Brainwave's PolicyIQ application.
+
+[![Brainwave Project Demo](https://img.youtube.com/vi/MwAY4v01rz8/0.jpg)](https://www.youtube.com/watch?v=MwAY4v01rz8)
+
+**[▶ Watch the Project Demo](https://www.youtube.com/watch?v=MwAY4v01rz8)**
 
 ## Product problem
 
