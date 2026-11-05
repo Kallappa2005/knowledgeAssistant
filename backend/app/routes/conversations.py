@@ -13,6 +13,7 @@ from app.services.conversation_service import (
     ask_in_conversation,
     conversation_response,
     create_conversation,
+    delete_conversation,
     get_owned_conversation,
     list_owned_conversations,
 )
@@ -53,6 +54,20 @@ def get_one(
             status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found."
         )
     return conversation_response(conversation)
+
+
+@router.delete("/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove(
+    conversation_id: UUID,
+    db: DatabaseSession,
+    user: CurrentUser,
+) -> None:
+    conversation = get_owned_conversation(db, user, conversation_id)
+    if conversation is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found."
+        )
+    delete_conversation(db, conversation)
 
 
 @router.post(

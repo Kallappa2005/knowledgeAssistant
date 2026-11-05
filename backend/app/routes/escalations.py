@@ -14,6 +14,7 @@ from app.schemas.escalations import (
 from app.services.escalation_service import (
     add_response,
     create_escalation,
+    delete_owned_escalation,
     get_escalation,
     get_owned_escalation,
     list_admin_escalations,
@@ -60,25 +61,42 @@ def get_mine(
     return escalation
 
 
+@employee_router.delete("/{escalation_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove(
+    escalation_id: UUID, db: DatabaseSession, user: CurrentUser
+) -> None:
+    escalation = get_owned_escalation(db, user, escalation_id)
+    if escalation is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Escalation not found."
+        )
+    try:
+        delete_owned_escalation(db, user, escalation)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(error)
+        ) from error
+
+
 @admin_router.get("", response_model=list[EscalationModel])
 def inbox(db: DatabaseSession) -> list[Escalation]:
     return list_admin_escalations(db)
 
 
-@admin_router.patch("/{escalation_id}/status", response_model=EscalationModel)
+@admin_router.patch("/{escalation_id}/status", status_code=status.HTTP_204_NO_CONTENT)
 def change_status(
     escalation_id: UUID,
     payload: EscalationStatusUpdateRequest,
     db: DatabaseSession,
     admin: CurrentUser,
-) -> Escalation:
+) -> None:
     escalation = get_escalation(db, escalation_id)
     if escalation is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Escalation not found."
         )
     try:
-        return update_status(db, admin, escalation, payload.status)
+        update_status(db, admin, escalation, payload.status)
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(error)

@@ -94,6 +94,17 @@ def get_escalation(db: Session, escalation_id: UUID) -> Escalation | None:
     )
 
 
+def delete_owned_escalation(
+    db: Session, user: User, escalation: Escalation
+) -> None:
+    if escalation.status is not EscalationStatus.CLOSED:
+        raise ValueError("Only closed escalations can be deleted.")
+    if escalation.user_id != user.id:
+        raise ValueError("You can only delete your own escalations.")
+    db.delete(escalation)
+    db.commit()
+
+
 def update_status(
     db: Session, admin: User, escalation: Escalation, new_status: EscalationStatus
 ) -> Escalation:
@@ -111,6 +122,10 @@ def update_status(
         escalation.id,
         {"from": old_status.value, "to": new_status.value},
     )
+    if new_status is EscalationStatus.CLOSED:
+        db.delete(escalation)
+        db.commit()
+        return escalation
     db.commit()
     db.refresh(escalation)
     return escalation

@@ -101,7 +101,10 @@ through LangChain with temperature zero. The response must contain citation
 chunk IDs that exactly match retrieved chunks; invalid or unsupported output is
 replaced with an uncertainty response that recommends escalation.
 
-Set `GROQ_API_KEY` in `backend/.env` to enable generation. If the key is absent,
+Set `GROQ_API_KEY` in `backend/.env` to enable generation. Set `GROQ_MODEL` to a
+model available to your Groq key, such as `openai/gpt-oss-20b`. The service
+falls back to `GROQ_FALLBACK_MODEL` when the configured model is unavailable. If
+the key is absent,
 retrieval is empty, the Groq service fails, or citation validation fails, the
 API returns an explicit uncertain response instead of inventing an answer.
 Conversation and message persistence is implemented in Phase 8.

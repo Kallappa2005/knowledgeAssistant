@@ -6,14 +6,16 @@ import {
   refreshAccessToken,
   registerUser,
 } from '../services/authService'
+import { setAccessToken, setRefreshSession } from '../services/api'
 import { AuthContext } from './authContext'
 
 export function AuthProvider({ children }) {
-  const [accessToken, setAccessToken] = useState(null)
+  const [accessToken, setAuthToken] = useState(null)
   const [user, setUser] = useState(null)
   const [isLoading, finishLoading] = useReducer(() => false, true)
 
   const applyAuthResponse = useCallback((authResponse) => {
+    setAuthToken(authResponse.access_token)
     setAccessToken(authResponse.access_token)
     setUser(authResponse.user)
   }, [])
@@ -24,6 +26,7 @@ export function AuthProvider({ children }) {
       applyAuthResponse(authResponse)
       return authResponse.user
     } catch {
+      setAuthToken(null)
       setAccessToken(null)
       setUser(null)
       return null
@@ -34,6 +37,11 @@ export function AuthProvider({ children }) {
     // Session restoration is an external async boundary during provider initialization.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshSession().finally(finishLoading)
+  }, [refreshSession])
+
+  useEffect(() => {
+    setRefreshSession(refreshSession)
+    return () => setRefreshSession(null)
   }, [refreshSession])
 
   const login = useCallback(async (credentials) => {
@@ -50,6 +58,7 @@ export function AuthProvider({ children }) {
     try {
       await logoutUser()
     } finally {
+      setAuthToken(null)
       setAccessToken(null)
       setUser(null)
     }

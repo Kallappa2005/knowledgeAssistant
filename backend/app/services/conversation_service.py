@@ -55,6 +55,11 @@ def list_owned_conversations(
     ]
 
 
+def delete_conversation(db: Session, conversation: Conversation) -> None:
+    db.delete(conversation)
+    db.commit()
+
+
 def _citation_response(citation: Citation) -> RagCitation:
     document = citation.document
     return RagCitation(
