@@ -20,3 +20,5 @@ uploads/temporary/*
 !uploads/documents/.gitkeep
 !uploads/temporary/.gitkeep
 chroma_db/
+
+/uploads/
