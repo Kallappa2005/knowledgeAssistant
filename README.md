@@ -13,6 +13,12 @@ The project has two role-based experiences:
   knowledge base, answer escalated questions, manage training courses, assign
   employees, and review learning progress.
 
+## Product demo
+
+<video src="./demo.mp4" controls width="800">
+  Your browser cannot play the video. [Watch the demo](./demo.mp4) instead.
+</video>
+
 ## Product problem
 
 Employees often need quick answers about policies such as leave, payroll,
