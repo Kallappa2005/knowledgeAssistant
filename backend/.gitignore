@@ -22,3 +22,7 @@ uploads/temporary/*
 chroma_db/
 
 /uploads/
+
+
+Internal Database URL.
+postgresql://policyiq_user:b72EHw0vEnsDY5x2I6185DQ7iWhbYxFG@dpg-dbmcc9gn74is73bhka20-a/policy_assistant
