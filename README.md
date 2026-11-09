@@ -22,6 +22,21 @@ Watch the complete demonstration of Brainwave's PolicyIQ application.
 
 **[▶ Watch the Project Demo](https://youtu.be/A6Yjjdc67RA)**
 
+## Quick links
+
+- [Product demo](#-product-demo)
+- [Product problem](#product-problem)
+- [User journeys](#user-journeys)
+- [Architecture](#architecture)
+- [Key technical decisions](#key-technical-decisions)
+- [Prerequisites](#prerequisites)
+- [Configuration](#configuration)
+- [Installation and first run](#installation-and-first-run)
+- [Reviewer smoke test](#reviewer-smoke-test)
+- [API areas](#api-areas)
+- [Validation commands](#validation-commands)
+- [Important local files](#important-local-files)
+- [Security and operational notes](#security-and-operational-notes)
 
 ## Product problem
 
