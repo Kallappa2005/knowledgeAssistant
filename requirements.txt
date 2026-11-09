@@ -1,4 +1,0 @@
-chromadb>=0.5
-anthropic>=0.40
-typer>=0.12
-rich>=13.7
