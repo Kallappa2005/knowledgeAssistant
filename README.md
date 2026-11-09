@@ -18,9 +18,9 @@ The project has two role-based experiences:
 
 Watch the complete demonstration of Brainwave's PolicyIQ application.
 
-[![Brainwave Project Demo](https://img.youtube.com/vi/XdvbO5gCbkU/0.jpg)](https://www.youtube.com/watch?v=XdvbO5gCbkU)
+[![Brainwave Project Demo](https://img.youtube.com/vi/A6Yjjdc67RA/0.jpg)](https://youtu.be/A6Yjjdc67RA)
 
-**[▶ Watch the Project Demo](https://www.youtube.com/watch?v=XdvbO5gCbkU)**
+**[▶ Watch the Project Demo](https://youtu.be/A6Yjjdc67RA)**
 
 
 ## Product problem

@@ -286,7 +286,7 @@ export default function MyLearningPage() {
                           {busy === 'quiz' ? 'Generating…' : 'Knowledge check'}
                         </Button>
                       </div>
-                      {summary && <div className="mb-5 rounded-xl border border-indigo-100 bg-indigo-50 p-4"><p className="mb-1 text-xs font-bold uppercase tracking-widest text-indigo-500">AI summary</p><p className="text-sm leading-relaxed text-indigo-950">{summary}</p></div>}
+                      {summary && <div className="mb-5 rounded-xl border border-indigo-100 bg-indigo-50 p-4"><p className="mb-1 text-xs font-bold uppercase tracking-widest text-indigo-500">AI summary</p><p className="whitespace-pre-line text-sm leading-relaxed text-indigo-950">{summary}</p></div>}
                       {quiz && (
                         <form onSubmit={submitQuiz} className="mb-5 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                           <div><p className="font-bold text-slate-800">Knowledge check</p><p className="text-xs text-slate-500">Answer all three questions, then submit.</p></div>

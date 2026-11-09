@@ -67,6 +67,34 @@ def test_generate_summary_requires_non_empty_model_output(
         learning_ai_service.generate_summary("training.pdf")
 
 
+def test_generate_summary_requires_five_paragraphs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(learning_ai_service, "_material_text", lambda _: "Material")
+    monkeypatch.setattr(
+        learning_ai_service,
+        "_invoke",
+        lambda *_: {"summary": "Paragraph one.\n\nParagraph two."},
+    )
+
+    with pytest.raises(ValueError, match="training summary was too short"):
+        learning_ai_service.generate_summary("training.pdf")
+
+
+def test_generate_summary_preserves_five_paragraphs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(learning_ai_service, "_material_text", lambda _: "Material")
+    summary = "\n\n".join(f"Paragraph {index}." for index in range(1, 6))
+    monkeypatch.setattr(
+        learning_ai_service,
+        "_invoke",
+        lambda *_: {"summary": f"\n{summary}\n"},
+    )
+
+    assert learning_ai_service.generate_summary("training.pdf") == summary
+
+
 @pytest.mark.parametrize(
     ("submitted", "expected"),
     [

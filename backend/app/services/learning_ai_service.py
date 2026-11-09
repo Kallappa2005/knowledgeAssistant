@@ -53,8 +53,13 @@ def generate_summary(storage_path: str) -> str:
         [
             (
                 "system",
-                "Summarize only the supplied training material in 3-5 concise sentences. "
-                "Do not use outside knowledge. Return JSON only: "
+                "Summarize only the supplied training material in 5-7 informative paragraphs. "
+                "Each paragraph must contain 3-5 complete sentences and paragraphs must be "
+                "separated by a blank line. Cover the document's main ideas, important "
+                "details, practical implications, and conclusions without repeating the "
+                "same point. Even when the material is short, provide at least 5 distinct "
+                "paragraphs using only information supported by the material. Do not use "
+                "outside knowledge. Return JSON only: "
                 '{{"summary": "string"}}',
             ),
             ("human", "Training material:\n{material}"),
@@ -64,7 +69,15 @@ def generate_summary(storage_path: str) -> str:
     summary = result.get("summary")
     if not isinstance(summary, str) or not summary.strip():
         raise ValueError("The generated training summary was invalid.")
-    return summary.strip()
+    normalized_summary = summary.strip()
+    paragraphs = [
+        paragraph.strip()
+        for paragraph in normalized_summary.split("\n\n")
+        if paragraph.strip()
+    ]
+    if len(paragraphs) < 5:
+        raise ValueError("The generated training summary was too short.")
+    return "\n\n".join(paragraphs)
 
 
 def generate_quiz(storage_path: str) -> list[dict[str, Any]]:
