@@ -9,7 +9,7 @@ The project has two role-based experiences:
 
 - **Employee**: ask policy questions, inspect citations, submit unsupported
   questions to HR, manage conversations, and complete assigned training.
-  
+
 - **Administrator / HR**: upload and approve policy documents, monitor the
   knowledge base, answer escalated questions, manage training courses, assign
   employees, and review learning progress.
@@ -398,6 +398,7 @@ Run backend checks from `backend`:
 uv run pytest
 uv run python -m compileall app
 ```
+
 
 Run frontend checks from `frontend`:
 
